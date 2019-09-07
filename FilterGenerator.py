@@ -2,11 +2,11 @@ import random as rd
 from deap import tools
 from deap import creator, base,algorithms
 import numpy as np
-from sklearn.tree import DecisionTreeClassifier as RF
+from sklearn.neighbors import KNeighborsClassifier as KNN
 from helper import generate
 from helper import convolve as convolve
 pooling=["min","max","mean"]
-
+import cv2
 
 
 
@@ -112,7 +112,7 @@ class featureGenerator:
                                    cxpb=self.crossoverRate, mutpb=self.mutationRate,
                                    ngen=self.ngens, stats=self.mstats,
                                    halloffame=self.hof,verbose=True)
-    def predict(self,testX,testY,classifier=RF(),filename="individual"):
+    def predict(self,testX,testY,classifier=KNN(n_neighbors=3,n_jobs=-1),filename="individual.txt"):
 
         f=open(filename+".txt",mode="w")
         for fl in self.hof[0]:
@@ -164,14 +164,23 @@ class featureGenerator:
             while moved < count:
                 for i in range(len(trainX)):
                     if trainY[i] == c:
-                        FX.append(np.array(trainX[i]).astype(float))
-                        FY.append(np.array(trainY[i]).astype(float))
+                        FX.append(np.array(trainX[i]))
+                        FY.append(np.array(trainY[i]))
                         trainY.pop(i)
                         trainX.pop(i)
                         moved += 1
                         break
-        return np.array(trainX).astype(float),np.array(trainY).astype(int),np.array(FX).astype(float),np.array(FY).astype(int)
-    def __init__(self,trainingX,trainingY,classifier=RF(),
+        return np.array(trainX),np.array(trainY),np.array(FX),np.array(FY)
+
+    def showAll(self):
+        best = self.hof[0]
+        image=cv2.imread("download.jpg" , cv2.IMREAD_GRAYSCALE)
+        for i, f in enumerate(best):
+            print("COOL")
+            img = convolve(image, f["filter"])
+            cv2.imwrite('out' + str(i) + ".jpeg", img)
+
+    def __init__(self,trainingX,trainingY,classifier=KNN(n_neighbors=3,n_jobs=-1),
                  populationSize=100,mutationRate=0.3,crossoverRate=0.7,
                  kfodls=-1,ngens=100,numberOfFilters=20):
         creator.create("FitnessMin", base.Fitness, weights=(1.0,))
@@ -181,7 +190,7 @@ class featureGenerator:
         self.crossoverRate=crossoverRate
         self.ngens=ngens
         self.numberOfFilters=numberOfFilters
-        self.trainingX=np.array(trainingX).astype(float)
+        self.trainingX=np.array(trainingX)
         self.trainingY=np.array(trainingY)
         toolbox = base.Toolbox()
 

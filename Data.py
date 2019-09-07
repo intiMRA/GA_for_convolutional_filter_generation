@@ -1,80 +1,41 @@
-import numpy as np
-import random
-def getFashion():
-    f1=[f.strip("\n").split(",") for f in open("fashionmnist/fashion-mnist_test.csv")]
-    f1.pop(0)
-    f2 = [f.strip("\n").split(",") for f in open("fashionmnist/fashion-mnist_train.csv")]
-    f2.pop(0)
-    random.seed(10)
-    random.shuffle(f1)
-    random.shuffle(f2)
-    file1=[]
-    file2=[]
-    classes1={}
-    for f in f1:
-        c=f[0]
-        if c not in classes1:
-            count=0
-            for ins in f1:
-                if ins[0]==c:
-                    count+=1
-            classes1[c]=count
-    classes2={}
-    for f in f2:
-        c=f[0]
-        if c not in classes2:
-            count=0
-            for ins in f2:
-                if ins[0]==c:
-                    count+=1
-            classes2[c]=count
-    for c in classes1.keys():
-        for i in range(classes1[c]//100):
-            for idx,ins in enumerate(f1):
-                if ins[0]==c:
-                    file1.append(ins)
-                    f1.pop(idx)
-                    break
-    for c in classes2.keys():
-        for i in range(classes2[c] // 100):
-            for idx, ins in enumerate(f2):
-                if ins[0] == c:
-                    file2.append(ins)
-                    f2.pop(idx)
-                    break
-    f1=file1
-    f2=file2
-    print(len(f1),len(f2))
-    traingX=[]
-    traingY = []
-    testX=[]
+import os
+import random as rd
+import cv2
+
+def getFaces() -> ([int], [int], [int], [int]):
+    rd.seed(10)
+    testX = []
     testY = []
+    files = os.listdir("jaffe")
+    all = []
+    for f in files:
+        image=cv2.imread("jaffe/" + f, cv2.IMREAD_GRAYSCALE)
+        all.append([image,f.split(".")[1][:-1]])
+    rd.shuffle(all)
+    classes = {}
+    cn=0
+    for d in all:
+        if d[-1] not in classes:
 
-    for f in f1:
-        im=[]
-        row = []
-        count=0
-        for i in range(1,len(f)):
-            if count==28:
-                im.append(np.array(row).astype(float))
-                row = []
-                count=0
-            count+=1
-            row.append(f[i])
-        testY.append(f[0])
-        testX.append(np.array(im))
+            classes[d[-1]] = [1,cn]
+            cn+=1
+        else:
+            classes[d[-1]][0] += 1
 
-    for f in f2:
-        im = []
-        row = []
-        count=0
-        for i in range(1,len(f)):
-            if count==28:
-                im.append(np.array(row).astype(float))
-                row = []
-                count=0
-            count+=1
-            row.append(f[i])
-        traingY.append(f[0])
-        traingX.append(np.array(im))
+    for c in classes.keys():
+        count = classes[c][0] // 3
+        moved = 0
+        while moved < count:
+            for i in range(len(all)):
+                if all[i][-1] == c:
+                    testX.append(all[i][0])
+                    testY.append(classes[c][1])
+                    all.pop(i)
+                    moved += 1
+                    break
+    traingY=[]
+    traingX=[]
+    for i in range(len(all)):
+        traingX.append(all[i][0])
+        traingY.append(classes[all[i][-1]][1])
     return traingX,traingY,testX,testY

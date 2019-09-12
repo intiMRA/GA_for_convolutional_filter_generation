@@ -172,13 +172,13 @@ class featureGenerator:
                         break
         return np.array(trainX),np.array(trainY),np.array(FX),np.array(FY)
 
-    def showAll(self):
+    def showAll(self,imagePath,outName):
         best = self.hof[0]
-        image=cv2.imread("download.jpg" , cv2.IMREAD_GRAYSCALE)
+        image=cv2.imread(imagePath , cv2.IMREAD_GRAYSCALE)
         for i, f in enumerate(best):
             print("COOL")
             img = convolve(image, f["filter"])
-            cv2.imwrite('out' + str(i) + ".jpeg", img)
+            cv2.imwrite(outName + str(i) + ".jpeg", img)
 
     def __init__(self,trainingX,trainingY,classifier=KNN(n_neighbors=3,n_jobs=-1),
                  populationSize=100,mutationRate=0.3,crossoverRate=0.7,

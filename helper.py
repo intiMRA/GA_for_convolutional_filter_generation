@@ -20,7 +20,8 @@ def gen_filter(size: (int, int)) -> np.ndarray:
 def generate(icls, numberOfFilters):
     global pooling
     size = rd.randint(3, 7)
-    individual = [{"splits":3,"filter": gen_filter((size, size)), "pool": pooling[rd.randint(0, len(pooling) - 1)]} for i in
+    spl=rd.randint(1,4)
+    individual = [{"splits":spl,"filter": gen_filter((size, size)), "pool": pooling[rd.randint(0, len(pooling) - 1)]} for i in
                   range(numberOfFilters)]
     return icls(individual)
 
